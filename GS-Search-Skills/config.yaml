@@ -1,0 +1,63 @@
+keywords_cn:
+  - 文生图
+  - 文生视频
+  - 视频制作
+  - Agent构建框架
+  - 公众号
+  - 内容制作
+  - 自媒体运营
+  - 小红书
+  - 抖音
+keywords_en:
+  - text-to-image
+  - text to image
+  - text-to-video
+  - text to video
+  - video generation
+  - video production
+  - agent framework
+  - agent building framework
+  - agentic framework
+  - WeChat Official Account
+  - Official Account
+  - content creation
+  - content production
+  - creator economy
+  - social media operations
+  - Xiaohongshu
+  - REDnote
+  - Douyin
+  - TikTok
+  - Agent
+  - LLM
+
+github:
+  token: ${GITHUB_TOKEN}
+  min_stars: 50
+  max_results: 20
+  seed_repos:
+    - cclank/news-aggregator-skill
+
+feishu:
+  webhook_url: ${FEISHU_WEBHOOK_URL}
+  webhook_secret: ${FEISHU_WEBHOOK_SECRET}
+  msg_type: post
+
+schedule:
+  enabled: false
+  mode: interval
+  interval_minutes: 360
+  daily_time: "09:30"
+  timezone: Asia/Shanghai
+
+sources:
+  skills_ecosystem: true
+  github_repos: true
+  seed_repos: true
+
+llm:
+  enabled: false
+  base_url: ${OPENAI_BASE_URL}
+  api_key: ${OPENAI_API_KEY}
+  model: ${OPENAI_MODEL}
+  timeout_s: 30

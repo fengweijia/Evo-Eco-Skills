@@ -1,0 +1,36 @@
+keywords_cn:
+  - 智能体
+  - 大模型
+keywords_en:
+  - Agent
+  - LLM
+
+github:
+  token: ${GITHUB_TOKEN}
+  min_stars: 50
+  max_results: 20
+  seed_repos:
+
+feishu:
+  webhook_url: ${FEISHU_WEBHOOK_URL}
+  webhook_secret: ${FEISHU_WEBHOOK_SECRET}
+  msg_type: post
+
+schedule:
+  enabled: false
+  mode: interval
+  interval_minutes: 360
+  daily_time: "09:30"
+  timezone: Asia/Shanghai
+
+sources:
+  skills_ecosystem: true
+  github_repos: true
+  seed_repos: true
+
+llm:
+  enabled: false
+  base_url: ${OPENAI_BASE_URL}
+  api_key: ${OPENAI_API_KEY}
+  model: ${OPENAI_MODEL}
+  timeout_s: 30
