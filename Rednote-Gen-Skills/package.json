@@ -1,0 +1,14 @@
+{
+  "name": "rednote002",
+  "version": "1.0.0",
+  "description": "小红书账号运营助手 - AI Skills",
+  "main": "backend/index.js",
+  "scripts": {
+    "start": "node backend/index.js",
+    "test": "node test-flow.js",
+    "test:full": "node test-full-flow.js"
+  },
+  "keywords": ["xiaohongshu", "social-media", "ai-assistant", "content-generation"],
+  "author": "",
+  "license": "MIT"
+}

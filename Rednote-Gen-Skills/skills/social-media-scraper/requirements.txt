@@ -1,0 +1,4 @@
+# rednote002 Social Media Scraper 依赖
+douyin-tiktok-scraper>=0.1.0
+httpx>=0.24.0
+asyncio

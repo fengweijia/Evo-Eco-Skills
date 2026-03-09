@@ -1,0 +1,125 @@
+{
+  "format": "图文",
+  "topic": {
+    "title": "测试主题"
+  },
+  "titles": [
+    {
+      "text": "【备选1】我花了3个月总结的测试主题，一次性分享给你",
+      "type": "数字+效果",
+      "score": 7
+    },
+    {
+      "text": "【备选2】职场人必看的测试主题指南，建议收藏",
+      "type": "悬念",
+      "score": 7
+    },
+    {
+      "text": "【备选3】3个测试主题的方法，90%的人都不知道",
+      "type": "反差",
+      "score": 9
+    }
+  ],
+  "content": {
+    "text": "测试主题是职场/生活中的重要议题，本文将分享核心方法论。\n\n很多人面临的问题是：\n\n【核心要点1】\n这是第一个关键点，具体应该这样做...\n比如...\n\n【核心要点2】\n第二个容易被忽略的点是...\n举一个例子：\n\n【核心要点3】\n最后一点，也是最重要的是...\n记住这个技巧：\n\n总结：本文从3个维度分析了测试主题，希望对您有所帮助。\n\n如果觉得有价值，请点赞收藏支持！\n\n#测试主题 #分享",
+    "structure": {
+      "opening": "测试主题是职场/生活中的重要议题，本文将分享核心方法论。",
+      "points": [
+        "核心要点1",
+        "核心要点2",
+        "核心要点3"
+      ],
+      "closing": "总结：本文从3个维度分析了测试主题，希望对您有所帮助。"
+    },
+    "style": "专业正式"
+  },
+  "cover": {
+    "type": "design-suggestion",
+    "description": {
+      "layout": "单图/拼图均可，建议文字在画面占比30%以内",
+      "background": "浅色背景 + 品牌色(#00E5A0) 点缀",
+      "text": "大标题 + 关键词",
+      "elements": [
+        "数据",
+        "人物",
+        "场景"
+      ]
+    },
+    "prompt": {
+      "image": "Social media cover for Xiaohongshu, 测试主题 topic, minimalist design, light background with green accent, clean and professional, text overlay: 测试主题, high quality, 4K",
+      "video": "YouTube/TikTok thumbnail style, 测试主题 topic, eye-catching design, high contrast, expressive, people or concept imagery, professional lighting"
+    },
+    "textOverlay": {
+      "position": "居中或右下角",
+      "font": "无衬线字体，加粗",
+      "size": "占画面15-20%",
+      "color": "#000000 或 #FFFFFF 根据背景调整"
+    },
+    "tags": "文字标签需简洁，最好1-4字"
+  },
+  "tags": {
+    "tags": [
+      "#职场",
+      "#职场干货",
+      "#成长",
+      "#测试主题",
+      "#2024",
+      "#自我提升"
+    ],
+    "count": 6,
+    "recommended": [
+      "#职场",
+      "#职场干货",
+      "#成长",
+      "#测试主题",
+      "#2024"
+    ],
+    "placement": "正文末尾，每条笔记带3-8个标签"
+  },
+  "publishingTime": {
+    "recommended": {
+      "day": "周三",
+      "time": "20:00-21:00",
+      "reason": "工作日黄金时段"
+    },
+    "alternatives": [
+      {
+        "day": "周三",
+        "time": "20:00-21:00",
+        "reason": "工作日黄金时段"
+      },
+      {
+        "day": "周四",
+        "time": "12:00-13:00",
+        "reason": "午休刷手机高峰期"
+      },
+      {
+        "day": "周五",
+        "time": "18:00-20:00",
+        "reason": "周末前最后一波流量"
+      },
+      {
+        "day": "周六",
+        "time": "10:00-12:00",
+        "reason": "周末流量高峰"
+      },
+      {
+        "day": "周日",
+        "time": "20:00-21:00",
+        "reason": "为下周做准备的心态"
+      }
+    ],
+    "tips": [
+      "建议固定发布时间，培养粉丝期待",
+      "新笔记可以适当提早1-2小时发布测试",
+      "重要内容可以多时间段测试"
+    ]
+  },
+  "videoScript": null,
+  "metadata": {
+    "wordCount": 21,
+    "estimatedReadTime": 1,
+    "hasEmoji": true,
+    "hasHashtags": true
+  }
+}
