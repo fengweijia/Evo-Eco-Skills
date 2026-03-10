@@ -31,22 +31,20 @@ def format_scan_result_to_sections(result: Dict[str, Any], max_items: int = 10) 
             stars = it.get("stars")
             analysis = it.get("analysis") or {}
             summary = analysis.get("summary_one_line") or ""
-            extra = _pick_points(analysis, limit=2)
+            why = _pick_why(analysis, fallback=summary)
             url = it.get("html_url") or it.get("skills_sh_url") or ""
             install = it.get("install") or ""
-            parts = [f"• {name}（{full}）"]
+            parts = [f"【必看技能】{name}（{full}）"]
             if stars is not None:
                 parts.append(f"⭐ {stars}")
-            if summary:
-                parts.append(f"\n  {summary}")
-            for t, c in extra:
-                parts.append(f"\n  {t}：{c}")
+            if why:
+                parts.append(f"\n推荐理由：{why}")
             if url:
-                parts.append(f"\n  {url}")
+                parts.append(f"\n链接：{url}")
             if install:
-                parts.append(f"\n  {install}")
+                parts.append(f"\n安装：{install}")
             lines.append("".join(parts) + "\n")
-        sections.append({"title": "技能发现", "lines": lines})
+        sections.append({"title": "必看技能（⭐≥2000）", "lines": lines})
 
     if repos:
         lines = []
@@ -55,33 +53,38 @@ def format_scan_result_to_sections(result: Dict[str, Any], max_items: int = 10) 
             stars = it.get("stars")
             analysis = it.get("analysis") or {}
             summary = analysis.get("summary_one_line") or ""
-            extra = _pick_points(analysis, limit=2)
+            why = _pick_why(analysis, fallback=summary)
             url = it.get("html_url") or ""
-            parts = [f"• {full}"]
+            parts = [f"【必看项目】{full}"]
             if stars is not None:
                 parts.append(f" ⭐ {stars}")
-            if summary:
-                parts.append(f"\n  {summary}")
-            for t, c in extra:
-                parts.append(f"\n  {t}：{c}")
+            if why:
+                parts.append(f"\n推荐理由：{why}")
             if url:
-                parts.append(f"\n  {url}")
+                parts.append(f"\n链接：{url}")
             lines.append("".join(parts) + "\n")
-        sections.append({"title": "项目发现", "lines": lines})
+        sections.append({"title": "必看项目（⭐≥2000）", "lines": lines})
 
-    meta = result.get("meta") or {}
-    kw = ", ".join(meta.get("keywords") or [])
-    if kw:
-        sections.append({"title": "本次关键词", "lines": [kw + "\n"]})
+    if not sections:
+        sections.append({"title": "本次无推荐", "lines": ["未找到符合 ⭐≥2000 的技能或项目。\n"]})
 
     return sections
 
 
-def _pick_points(analysis: Dict[str, Any], limit: int) -> List[tuple]:
+def _pick_why(analysis: Dict[str, Any], fallback: str) -> str:
     pts = analysis.get("points") or []
     if not isinstance(pts, list):
-        return []
-    out: List[tuple] = []
+        return (fallback or "").strip()
+    preferred = {"使用场景", "集成方式", "风险点", "适用人群"}
+    for p in pts:
+        if not isinstance(p, dict):
+            continue
+        t = (p.get("title") or "").strip()
+        c = (p.get("claim_text") or "").strip()
+        if not t or not c:
+            continue
+        if t in preferred:
+            return c[:220]
     for p in pts:
         if not isinstance(p, dict):
             continue
@@ -91,10 +94,8 @@ def _pick_points(analysis: Dict[str, Any], limit: int) -> List[tuple]:
             continue
         if t in ("一行总结", "要点摘要"):
             continue
-        out.append((t, c[:180]))
-        if len(out) >= limit:
-            break
-    return out
+        return c[:220]
+    return (fallback or "").strip()
 
 
 def default_title(prefix: str = "技能/开源情报") -> str:

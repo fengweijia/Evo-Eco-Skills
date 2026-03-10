@@ -1,39 +1,40 @@
-keywords_cn:
-  - 文生图
-  - 文生视频
-  - 视频制作
-  - Agent构建框架
-  - 公众号
-  - 内容制作
-  - 自媒体运营
-  - 小红书
-  - 抖音
-keywords_en:
-  - text-to-image
-  - text to image
-  - text-to-video
-  - text to video
-  - video generation
-  - video production
-  - agent framework
-  - agent building framework
-  - agentic framework
-  - WeChat Official Account
-  - Official Account
-  - content creation
-  - content production
-  - creator economy
-  - social media operations
-  - Xiaohongshu
-  - REDnote
-  - Douyin
-  - TikTok
-  - Agent
-  - LLM
+query:
+  mode: industries
+  max_combo_size: 3
+  max_combos_per_industry: 120
+
+industries:
+  - name: 自媒体
+    cn:
+      singles:
+        - 公众号内容创作
+        - 小红书笔记生成
+        - 文生图
+        - 图生视频
+        - 文章扩写
+      groups:
+        - [公众号, 小红书, 抖音]
+        - [内容创作, 笔记生成, 文章扩写, 标题生成, 文案生成]
+        - [文生图, 文生视频, 图生视频]
+    en:
+      singles:
+        - WeChat Official Account content creation
+        - Xiaohongshu note generation
+        - text-to-image
+        - image-to-video
+        - article expansion
+      groups:
+        - [WeChat Official Account, Xiaohongshu, REDnote, Douyin, TikTok]
+        - [content creation, note generation, article expansion, title generation, copywriting]
+        - [text-to-image, text-to-video, image-to-video]
+
+keywords_cn: []
+keywords_en: []
+
 
 github:
   token: ${GITHUB_TOKEN}
-  min_stars: 50
+  min_stars: 2000
   max_results: 20
   seed_repos:
     - cclank/news-aggregator-skill

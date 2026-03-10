@@ -38,6 +38,20 @@ cp config.example.yaml config.yaml
 export GS_SEARCH_SKILLS_CONFIG="/绝对路径/你的config.yaml"
 ```
 
+查询模式：
+
+- `keywords`：直接使用 `keywords_cn/keywords_en` 逐个关键词检索
+- `industries`：按“行业/品类”拆解关键词，并自动组合（单词、双词、三词组合）形成更有意义的检索
+
+当前默认使用 `industries`，配置示例见 [config.example.yaml](file:///Users/apple/Documents/PythonP/Evo-Eco-Skills/GS-Search-Skills/config.example.yaml)。
+
+`industries` 配置要点：
+
+- `singles`：你明确希望单独查询的关键词（例如“文生图”“文章扩写”）
+- `groups`：关键词分组。系统会自动生成组合查询（例如“公众号 内容创作”“小红书 笔记生成”“公众号 内容创作 文生图”）
+- `query.max_combo_size`：组合关键词的最大长度（默认 3）
+- `query.max_combos_per_industry`：每个行业最多生成多少条组合查询，防止组合爆炸
+
 ### 4) 环境变量配置（重点）
 
 #### 4.1 GitHub（建议配置，避免限流）
@@ -61,6 +75,11 @@ macOS / zsh 示例：
 ```bash
 export GITHUB_TOKEN="ghp_xxx"
 ```
+
+推荐规则（重要）：
+
+- 本 Skill 只推送 ⭐≥2000 的 Skills/开源项目（低于 2000 star 的不予推荐）
+- `config.yaml` 的 `github.min_stars` 默认建议设置为 `2000`（你也可以提高阈值）
 
 #### 4.2 飞书（推送必配）
 
@@ -174,6 +193,12 @@ python -m gs_search_skills.cli run --keyword Agent --keyword LLM --output ./out.
 cd /Users/apple/Documents/PythonP/Evo-Eco-Skills/GS-Search-Skills
 python -m gs_search_skills.cli run --push --keyword 智能体 --keyword Agent
 ```
+
+飞书消息呈现方式（推送样式）：
+
+- 仅包含两类信息：必看技能、必看项目
+- 每条只展示：名称/仓库、star 数、推荐理由（从分析结果抽取关键点）、链接（技能会额外给出安装命令）
+- 若本次没有符合 ⭐≥2000 的条目，会推送“本次无推荐”
 
 #### 5.3 定时任务（常驻进程自动推送）
 

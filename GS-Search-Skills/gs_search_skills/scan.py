@@ -32,8 +32,9 @@ def run_scan(config: ScannerConfig, overrides: Optional[Dict[str, Any]] = None) 
     skills_enriched = [_enrich_skill(gh, it, config=config) for it in skills]
     repos_enriched = [_enrich_repo(gh, it, config=config) for it in repos]
 
-    min_stars = int(config.github.min_stars or 0)
-    skills_enriched = [x for x in skills_enriched if int(x.get("stars") or 0) >= min_stars]
+    recommend_min_stars = max(int(config.github.min_stars or 0), 2000)
+    skills_enriched = [x for x in skills_enriched if int(x.get("stars") or 0) >= recommend_min_stars]
+    repos_enriched = [x for x in repos_enriched if int(x.get("stars") or 0) >= recommend_min_stars]
 
     skills_final = _sort_and_dedupe(skills_enriched, key=lambda x: (x.get("owner"), x.get("repo"), x.get("skill_name")))
     repos_final = _sort_and_dedupe(repos_enriched, key=lambda x: (x.get("owner"), x.get("repo")))
@@ -51,8 +52,14 @@ def run_scan(config: ScannerConfig, overrides: Optional[Dict[str, Any]] = None) 
 
 def _merge_keywords(config: ScannerConfig, overrides: Dict[str, Any]) -> List[str]:
     kws: List[str] = []
-    kws.extend(config.keywords_cn or [])
-    kws.extend(config.keywords_en or [])
+
+    use_industries = (config.query.mode or "").strip().lower() == "industries" or bool(config.industries)
+    if use_industries and config.industries:
+        kws.extend(_build_industry_queries(config))
+    else:
+        kws.extend(config.keywords_cn or [])
+        kws.extend(config.keywords_en or [])
+
     extra = overrides.get("keywords") or []
     if isinstance(extra, list):
         kws.extend([str(x) for x in extra])
@@ -66,6 +73,95 @@ def _merge_keywords(config: ScannerConfig, overrides: Dict[str, Any]) -> List[st
             continue
         seen.add(s.lower())
         out.append(s)
+    return out
+
+
+def _build_industry_queries(config: ScannerConfig) -> List[str]:
+    out: List[str] = []
+    max_combo_size = int(getattr(config.query, "max_combo_size", 3) or 3)
+    max_per = int(getattr(config.query, "max_combos_per_industry", 120) or 120)
+    max_combo_size = max(1, min(5, max_combo_size))
+    if max_per < 0:
+        max_per = 0
+
+    for ind in config.industries or []:
+        out.extend(_industry_lang_queries(ind.cn, max_combo_size=max_combo_size, max_out=max_per))
+        out.extend(_industry_lang_queries(ind.en, max_combo_size=max_combo_size, max_out=max_per))
+    return out
+
+
+def _industry_lang_queries(lang, max_combo_size: int, max_out: int) -> List[str]:
+    singles = [str(x).strip() for x in (getattr(lang, "singles", None) or []) if str(x).strip()]
+    groups_raw = getattr(lang, "groups", None) or []
+    groups: List[List[str]] = []
+    for g in groups_raw:
+        if not isinstance(g, list):
+            continue
+        gg = [str(x).strip() for x in g if str(x).strip()]
+        if gg:
+            groups.append(gg)
+
+    out: List[str] = []
+    out.extend(singles)
+    for g in groups:
+        out.extend(g)
+
+    produced = 0
+    if max_out == 0:
+        return out
+
+    if len(groups) >= 2 and max_combo_size >= 2:
+        for i in range(len(groups)):
+            for j in range(i + 1, len(groups)):
+                for a in groups[i]:
+                    for b in groups[j]:
+                        out.append(f"{a} {b}".strip())
+                        produced += 1
+                        if produced >= max_out:
+                            return out
+
+    if len(groups) >= 3 and max_combo_size >= 3:
+        for i in range(len(groups)):
+            for j in range(i + 1, len(groups)):
+                for k in range(j + 1, len(groups)):
+                    for a in groups[i]:
+                        for b in groups[j]:
+                            for c in groups[k]:
+                                out.append(f"{a} {b} {c}".strip())
+                                produced += 1
+                                if produced >= max_out:
+                                    return out
+
+    if len(groups) >= 4 and max_combo_size >= 4:
+        for i in range(len(groups)):
+            for j in range(i + 1, len(groups)):
+                for k in range(j + 1, len(groups)):
+                    for m in range(k + 1, len(groups)):
+                        for a in groups[i]:
+                            for b in groups[j]:
+                                for c in groups[k]:
+                                    for d in groups[m]:
+                                        out.append(f"{a} {b} {c} {d}".strip())
+                                        produced += 1
+                                        if produced >= max_out:
+                                            return out
+
+    if len(groups) >= 5 and max_combo_size >= 5:
+        for i in range(len(groups)):
+            for j in range(i + 1, len(groups)):
+                for k in range(j + 1, len(groups)):
+                    for m in range(k + 1, len(groups)):
+                        for n in range(m + 1, len(groups)):
+                            for a in groups[i]:
+                                for b in groups[j]:
+                                    for c in groups[k]:
+                                        for d in groups[m]:
+                                            for e in groups[n]:
+                                                out.append(f"{a} {b} {c} {d} {e}".strip())
+                                                produced += 1
+                                                if produced >= max_out:
+                                                    return out
+
     return out
 
 

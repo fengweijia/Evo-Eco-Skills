@@ -25,7 +25,7 @@ def _interpolate_env(value: Any) -> Any:
 
 class GithubConfig(BaseModel):
     token: Optional[str] = Field(default=None)
-    min_stars: int = Field(default=50, ge=0)
+    min_stars: int = Field(default=2000, ge=0)
     max_results: int = Field(default=20, ge=1, le=100)
     seed_repos: List[str] = Field(default_factory=lambda: ["cclank/news-aggregator-skill"])
 
@@ -62,6 +62,23 @@ class LlmConfig(BaseModel):
     timeout_s: float = Field(default=30.0, ge=1.0)
 
 
+class QueryConfig(BaseModel):
+    mode: str = Field(default="keywords")
+    max_combo_size: int = Field(default=3, ge=1, le=5)
+    max_combos_per_industry: int = Field(default=120, ge=0, le=2000)
+
+
+class IndustryLangConfig(BaseModel):
+    singles: List[str] = Field(default_factory=list)
+    groups: List[List[str]] = Field(default_factory=list)
+
+
+class IndustryConfig(BaseModel):
+    name: str = Field(default="")
+    cn: IndustryLangConfig = Field(default_factory=IndustryLangConfig)
+    en: IndustryLangConfig = Field(default_factory=IndustryLangConfig)
+
+
 class ScannerConfig(BaseModel):
     keywords_cn: List[str] = Field(default_factory=list)
     keywords_en: List[str] = Field(default_factory=list)
@@ -70,6 +87,8 @@ class ScannerConfig(BaseModel):
     schedule: ScheduleConfig = Field(default_factory=ScheduleConfig)
     sources: SourcesConfig = Field(default_factory=SourcesConfig)
     llm: LlmConfig = Field(default_factory=LlmConfig)
+    query: QueryConfig = Field(default_factory=QueryConfig)
+    industries: List[IndustryConfig] = Field(default_factory=list)
 
     def public_dict(self) -> Dict[str, Any]:
         d = self.dict()

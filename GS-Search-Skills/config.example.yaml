@@ -1,13 +1,39 @@
-keywords_cn:
-  - 智能体
-  - 大模型
-keywords_en:
-  - Agent
-  - LLM
+query:
+  mode: industries
+  max_combo_size: 3
+  max_combos_per_industry: 120
+
+industries:
+  - name: 自媒体
+    cn:
+      singles:
+        - 公众号内容创作
+        - 小红书笔记生成
+        - 文生图
+        - 图生视频
+        - 文章扩写
+      groups:
+        - [公众号, 小红书, 抖音]
+        - [内容创作, 笔记生成, 文章扩写, 标题生成, 文案生成]
+        - [文生图, 文生视频, 图生视频]
+    en:
+      singles:
+        - WeChat Official Account content creation
+        - Xiaohongshu note generation
+        - text-to-image
+        - image-to-video
+        - article expansion
+      groups:
+        - [WeChat Official Account, Xiaohongshu, REDnote, Douyin, TikTok]
+        - [content creation, note generation, article expansion, title generation, copywriting]
+        - [text-to-image, text-to-video, image-to-video]
+
+keywords_cn: []
+keywords_en: []
 
 github:
   token: ${GITHUB_TOKEN}
-  min_stars: 50
+  min_stars: 2000
   max_results: 20
   seed_repos:
 
