@@ -1,0 +1,41 @@
+{
+  "keywords": [
+    "OPC一人公司",
+    "AI副业",
+    "AI创业",
+    "OpenClaw",
+    "多智能体"
+  ],
+  "platforms": [
+    "bilibili",
+    "xiaohongshu",
+    "weibo",
+    "zhihu"
+  ],
+  "fetch_interval_hours": 6,
+  "auto_filter": true,
+  "min_views": 10000,
+  "ai": {
+    "provider": "mock",
+    "api_key": "",
+    "model": "gpt-4"
+  },
+  "image": {
+    "provider": "mock",
+    "api_key": ""
+  },
+  "reuse": {
+    "enabled": false,
+    "local_hotspots_file": "",
+    "github_hotspots_url": ""
+  },
+  "wechat": {
+    "enabled": false,
+    "app_id": "",
+    "app_secret": ""
+  },
+  "xiaohongshu": {
+    "enabled": false,
+    "mcp_url": ""
+  }
+}
