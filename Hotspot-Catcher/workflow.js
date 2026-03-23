@@ -29,6 +29,17 @@ function parseArgs(argv) {
   return result;
 }
 
+function buildRuntimeConfig(config, args) {
+  const keyword = (args.keyword || '').trim();
+  if (keyword) {
+    return { ...config, keywords: [keyword] };
+  }
+  return {
+    ...config,
+    keywords: Array.isArray(config.keywords) && config.keywords.length > 0 ? config.keywords : ['柑橘']
+  };
+}
+
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -63,8 +74,8 @@ function buildRunDir() {
 }
 
 async function saveDraftsAndImages({ config, hotspot, opinion, styles, runDir }) {
-  const wechatDraft = await generateArticle(hotspot, opinion, 'wechat');
-  const xhsDraft = await generateArticle(hotspot, opinion, 'xiaohongshu');
+  const wechatDraft = await generateArticle(hotspot, opinion, 'wechat', config);
+  const xhsDraft = await generateArticle(hotspot, opinion, 'xiaohongshu', config);
 
   const wechatPath = path.join(runDir, 'wechat.md');
   const xhsPath = path.join(runDir, 'xiaohongshu.md');
@@ -102,7 +113,7 @@ async function saveDraftsAndImages({ config, hotspot, opinion, styles, runDir })
 }
 
 function buildRunReport({ config, keyword, hotspot, opinion, styles, outputs }) {
-  return {
+  const report = {
     run_id: path.basename(path.dirname(outputs.wechatPath)),
     keyword,
     hotspot: {
@@ -133,6 +144,10 @@ function buildRunReport({ config, keyword, hotspot, opinion, styles, outputs }) 
     },
     generated_at: new Date().toISOString()
   };
+  if (config._last_image_error) {
+    report.image_error = config._last_image_error;
+  }
+  return report;
 }
 
 async function main() {
@@ -142,17 +157,16 @@ async function main() {
 
     const args = parseArgs(process.argv.slice(2));
     const config = loadConfig();
-    const keyword = args.keyword || '柑橘';
     const styles = args.styles.slice(0, 5);
-    const runtimeConfig = { ...config, keywords: [keyword] };
+    const runtimeConfig = buildRuntimeConfig(config, args);
     const runDir = buildRunDir();
 
-    console.log(`关键词: ${keyword}`);
+    console.log(`关键词: ${runtimeConfig.keywords.join(' / ')}`);
     console.log(`配图风格: ${styles.join(' / ')}`);
 
     const hotspots = await fetchHotspots(runtimeConfig);
     const selectedHotspot = selectTopHotspot(hotspots);
-    const opinions = await generateOpinions(selectedHotspot);
+    const opinions = await generateOpinions(selectedHotspot, runtimeConfig);
     const selectedOpinion = selectOpinion(opinions);
 
     const outputs = await saveDraftsAndImages({
@@ -165,7 +179,7 @@ async function main() {
 
     const report = buildRunReport({
       config: runtimeConfig,
-      keyword,
+      keyword: selectedHotspot.keyword || runtimeConfig.keywords[0],
       hotspot: selectedHotspot,
       opinion: selectedOpinion,
       styles,
@@ -185,7 +199,7 @@ async function main() {
   }
 }
 
-module.exports = { main };
+module.exports = { main, buildRuntimeConfig };
 
 if (require.main === module) {
   main();

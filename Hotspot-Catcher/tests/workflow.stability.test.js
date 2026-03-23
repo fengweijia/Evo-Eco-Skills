@@ -7,20 +7,12 @@ const { generateOpinions } = require('../utils/ai.js');
 const { generateImageCandidates } = require('../utils/image.js');
 const { fetchHotspots } = require('../fetch.js');
 
-const CONFIG_PATH = path.join(__dirname, '..', 'config.json');
-
 test('非mock AI配置下仍能产出观点兜底', async () => {
-  const original = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
-  const next = JSON.parse(JSON.stringify(original));
-  next.ai.provider = 'openai';
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(next, null, 2));
-
-  try {
-    const opinions = await generateOpinions({ keyword: '柑橘', title: '柑橘上热搜了' });
-    assert.ok(opinions.length > 0);
-  } finally {
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(original, null, 2));
-  }
+  const opinions = await generateOpinions(
+    { keyword: '柑橘', title: '柑橘上热搜了' },
+    { ai: { provider: 'openai', api_key: '' } }
+  );
+  assert.ok(opinions.length > 0);
 });
 
 test('未知图片供应商时自动回退到可用图片链接', async () => {

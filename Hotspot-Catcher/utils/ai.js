@@ -1,8 +1,19 @@
 const CONFIG_PATH = require('path').join(__dirname, '..', 'config.json');
 const fs = require('fs');
+const axios = require('axios');
+const { loadEnvFile } = require('./env.js');
+
+loadEnvFile();
 
 function loadConfig() {
   return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+}
+
+function getConfig(runtimeConfig) {
+  if (runtimeConfig) {
+    return runtimeConfig;
+  }
+  return loadConfig();
 }
 
 function buildFallbackOpinions(hotspot) {
@@ -28,11 +39,86 @@ function buildFallbackOpinions(hotspot) {
   ];
 }
 
-async function generateOpinions(hotspot) {
-  const config = loadConfig();
+function extractJson(text) {
+  const raw = String(text || '').trim();
+  if (!raw) {
+    return null;
+  }
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    const match = raw.match(/```json([\s\S]*?)```/i) || raw.match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
+    if (!match) {
+      return null;
+    }
+    try {
+      return JSON.parse(match[1].trim());
+    } catch (innerError) {
+      return null;
+    }
+  }
+}
 
-  if (config.ai.provider === 'mock') {
+async function callSiliconflowChat({ apiKey, model, prompt }) {
+  const response = await axios.post(
+    'https://api.siliconflow.cn/v1/chat/completions',
+    {
+      model: model || 'Pro/moonshotai/Kimi-K2.5',
+      temperature: 0.7,
+      messages: [
+        { role: 'system', content: '你是中文内容策划助手，请严格输出JSON。' },
+        { role: 'user', content: prompt }
+      ]
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 20000
+    }
+  );
+  return response.data?.choices?.[0]?.message?.content || '';
+}
+
+function resolveAiConfig(config) {
+  const provider = config.ai?.provider || process.env.AI_PROVIDER || 'mock';
+  const apiKey =
+    config.ai?.api_key ||
+    process.env.SILICONFLOW_API_KEY ||
+    process.env.AI_API_KEY ||
+    '';
+  const model = config.ai?.model || process.env.AI_MODEL || 'Pro/moonshotai/Kimi-K2.5';
+  return { provider, apiKey, model };
+}
+
+async function generateOpinions(hotspot, runtimeConfig) {
+  const config = getConfig(runtimeConfig);
+  const ai = resolveAiConfig(config);
+
+  if (ai.provider === 'mock') {
     return buildFallbackOpinions(hotspot);
+  }
+
+  if (ai.provider === 'siliconflow' && ai.apiKey) {
+    try {
+      const content = await callSiliconflowChat({
+        apiKey: ai.apiKey,
+        model: ai.model,
+        prompt: `请围绕热点“${hotspot.title}”生成3个观点方向，返回JSON数组，字段:id,title,content,angle。`
+      });
+      const parsed = extractJson(content);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((item, index) => ({
+          id: Number(item.id || index + 1),
+          title: String(item.title || `观点${index + 1}`),
+          content: String(item.content || ''),
+          angle: String(item.angle || '分析')
+        }));
+      }
+    } catch (error) {
+      return buildFallbackOpinions(hotspot);
+    }
   }
 
   return buildFallbackOpinions(hotspot);
@@ -84,15 +170,40 @@ function buildXhsDraft(hotspot, opinion) {
   };
 }
 
-async function generateArticle(hotspot, opinion, platform = 'wechat') {
-  const config = loadConfig();
+async function generateArticle(hotspot, opinion, platform = 'wechat', runtimeConfig) {
+  const config = getConfig(runtimeConfig);
+  const ai = resolveAiConfig(config);
   const safeOpinion = opinion || buildFallbackOpinions(hotspot)[0];
 
-  if (config.ai.provider === 'mock') {
+  if (ai.provider === 'mock') {
     if (platform === 'xiaohongshu') {
       return buildXhsDraft(hotspot, safeOpinion);
     }
     return buildWechatDraft(hotspot, safeOpinion);
+  }
+
+  if (ai.provider === 'siliconflow' && ai.apiKey) {
+    try {
+      const content = await callSiliconflowChat({
+        apiKey: ai.apiKey,
+        model: ai.model,
+        prompt: `请为${platform}生成发布文案，热点:${hotspot.title}，观点:${safeOpinion.content}。返回JSON对象，字段:title,body,tags(数组)。`
+      });
+      const parsed = extractJson(content);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          title: String(parsed.title || `${hotspot.keyword}内容草稿`),
+          body: String(parsed.body || safeOpinion.content),
+          tags: Array.isArray(parsed.tags) && parsed.tags.length > 0 ? parsed.tags.map(tag => String(tag)) : [hotspot.keyword]
+        };
+      }
+    } catch (error) {
+      return {
+        title: `${hotspot.keyword}内容草稿`,
+        body: `${safeOpinion.content}\n\nAI调用失败，已自动降级。`,
+        tags: [hotspot.keyword]
+      };
+    }
   }
 
   return {
