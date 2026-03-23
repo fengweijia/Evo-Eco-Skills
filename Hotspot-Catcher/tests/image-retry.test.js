@@ -82,3 +82,43 @@ test('图片接口提示最小像素要求时应自动升级到2048尺寸重试'
     axios.post = originalPost;
   }
 });
+
+test('图片接口失败时应透出结构化错误码与明确信息', async () => {
+  const originalPost = axios.post;
+  axios.post = async () => {
+    const error = new Error('Request failed with status code 404');
+    error.response = {
+      status: 404,
+      data: {
+        error: {
+          code: 'ModelNotOpen',
+          message: 'Your account has not activated the model'
+        }
+      }
+    };
+    throw error;
+  };
+
+  try {
+    const config = {
+      image: {
+        provider: 'volcengine',
+        api_key: 'test-key',
+        model: 'doubao-seedream-4-0-250828',
+        fallback_models: []
+      }
+    };
+    const results = await generateImageCandidates({
+      config,
+      title: '错误透出测试',
+      keyword: 'OPC',
+      platform: 'wechat',
+      styles: ['写实摄影']
+    });
+    assert.ok(results[0].imageUrl.includes('picsum.photos'));
+    assert.equal(config._last_image_error.code, 'ModelNotOpen');
+    assert.equal(config._last_image_error.message, 'Your account has not activated the model');
+  } finally {
+    axios.post = originalPost;
+  }
+});

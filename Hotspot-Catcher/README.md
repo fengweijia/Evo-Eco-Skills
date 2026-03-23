@@ -10,6 +10,8 @@
 - ✅ 自动生成 5 种风格配图候选
 - ✅ 失败兜底机制（AI 非 mock、图片供应商异常时仍可产出）
 - ✅ 运行报告输出（run-report.json）
+- ✅ 爆款结构分析与5套模板重组（T1-T5）
+- ✅ 插件运行时（provider路由、fallback、trace）
 
 ## 环境要求
 
@@ -106,6 +108,8 @@ output/publish-pack/run-时间戳/
 
 - `provider = mock`：返回可用占位图链接
 - `provider = deepai`：调用 DeepAI 文生图
+- `provider = siliconflow`：调用 SiliconFlow 图片接口
+- `provider = volcengine/huoshan/ark`：调用火山 Ark 图片接口
 - 未知 provider / key 缺失 / 调用失败：自动回退 mock 链接
 
 ### 生态复用配置
@@ -130,9 +134,63 @@ output/publish-pack/run-时间戳/
 ```bash
 npm run fetch         # 仅采集热点
 npm run skill:citrus  # Skill 主流程（推荐）
+npm run reuse:import -- --source <url-or-path> # 复用资产导入
 npm run probe:siliconflow # 真实API连通性探针
 npm test              # 稳定性测试
 ```
+
+探针输出说明：
+- `chat.status=ok`：文案模型真实可用
+- `image.status=ok`：图片真实可用（非占位图）
+- `image.status=degraded`：已降级到占位图，需看 `image.lastError` 定位原因
+
+## 人工见解干预
+
+在 `input/manual-insights.json` 中配置人工见解（可从 `input/manual-insights.example.json` 复制）：
+
+```json
+[
+  { "keyword": "OPC", "insight": "强调可复制流程与风险边界" }
+]
+```
+
+工作流会自动按关键词命中并融合到观点/文案生成过程，运行报告中会标记：
+- `manual_insight_applied`
+- `manual_insight`
+
+## Prompt 迭代优化
+
+项目内置 `templates/prompt-variants.json`，用于配置多种提示词策略。每次运行会在 `run-report.json` 输出：
+- `prompt_iteration.best_prompt_id`
+- `prompt_iteration.scores`
+- `prompt_iteration.best_candidate_id`
+- `prompt_iteration.candidate_scores`
+- `prompt_iteration.optimized_prompt`
+
+你可以持续调优变体描述与策略，以提高目标平台内容质量。
+
+## GitHub/Skills 生态复用
+
+通过导入脚本快速复用外部资产：
+
+```bash
+npm run reuse:import -- --source https://raw.githubusercontent.com/<owner>/<repo>/main/<file>
+npm run reuse:import -- --source /absolute/path/to/skills/<skill>/SKILL.md
+```
+
+导入结果会写入：
+- `assets/reuse/reuse-*.txt`
+- `assets/reuse/reuse-manifest.json`
+
+## 爆款模板与插件路由
+
+- 爆款模板配置：`templates/viral-structures.json`（T1 问题-方案、T2 误区-纠偏、T3 案例拆解、T4 清单指南、T5 趋势预判）
+- 统一文本解析：`utils/content-normalizer.js`
+- 爆款分析：`utils/viral-analyzer.js`
+- 模板引擎：`utils/template-engine.js`
+- 插件运行时：`utils/plugins-runtime.js`
+
+`config.json` 的 `plugins` 字段可配置各能力的 provider（`builtin` 或 `external`），当 external 不可用时会自动 fallback。
 
 ## 测试
 
@@ -140,6 +198,8 @@ npm test              # 稳定性测试
 - 非 mock AI 场景观点兜底
 - 图片供应商异常回退
 - 生态复用数据源优先接入
+- 插件路由优先级与 schema 回退
+- 爆款模板与 prompt 迭代字段输出
 
 执行：
 
@@ -155,17 +215,36 @@ Hotspot-Catcher/
 ├── fetch.js
 ├── workflow.js
 ├── package.json
+├── docs/
+│   └── superpowers/
+├── input/
+│   └── manual-insights.example.json
+├── scripts/
+│   ├── import-reuse-assets.js
+│   └── probe-siliconflow.js
 ├── skills/
 │   └── citrus-hotspot-content/
 │       └── SKILL.md
-├── tests/
-│   └── workflow.stability.test.js
 ├── templates/
+│   ├── prompt-variants.json
+│   ├── viral-structures.json
 │   ├── wechat.md
 │   └── xiaohongshu.md
+├── tests/
+│   ├── workflow.stability.test.js
+│   ├── workflow.integration.test.js
+│   └── workflow.viral-pipeline.integration.test.js
 └── utils/
     ├── ai.js
+    ├── content-normalizer.js
+    ├── hotspot.js
     ├── image.js
+    ├── insight.js
+    ├── plugins-runtime.js
+    ├── prompt.js
+    ├── reuse.js
+    ├── template-engine.js
+    ├── viral-analyzer.js
     └── platform.js
 ```
 
@@ -179,6 +258,9 @@ Hotspot-Catcher/
 
 ### Q3：如何做成自动发布？
 - 当前定位是“生成可发布包 + 手动发布”，后续可按公众号/小红书接口扩展发布器。
+
+### Q4：如何确认热点详情是否完整？
+- 查看 `run-report.json` 中 `hotspots` 字段，包含平台、标题、链接、热度指数等结构化信息。
 
 ## License
 
