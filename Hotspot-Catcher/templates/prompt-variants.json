@@ -1,0 +1,14 @@
+[
+  {
+    "id": "clarity-first",
+    "description": "结构清晰，结论先行，强调可执行步骤"
+  },
+  {
+    "id": "story-first",
+    "description": "案例开场，引发共鸣，再给方法框架"
+  },
+  {
+    "id": "data-first",
+    "description": "数据证据驱动，突出投入产出与风险边界"
+  }
+]

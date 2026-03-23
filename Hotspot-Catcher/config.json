@@ -18,9 +18,9 @@
     "model": "Pro/MiniMaxAI/MiniMax-M2.5"
   },
   "image": {
-    "provider": "HUOSHAN",
+    "provider": "volcengine",
     "api_key": "8abf0efc-99c3-44fa-a682-f798a30c08ec",
-    "model": "doubao-seedream-5-0-260128"
+    "model": "doubao-seedream-4-5-251128"
   },
   "reuse": {
     "enabled": false,
@@ -35,5 +35,19 @@
   "xiaohongshu": {
     "enabled": false,
     "mcp_url": ""
+  },
+  "plugins": {
+    "hotspot": {
+      "provider": "builtin"
+    },
+    "viral": {
+      "provider": "builtin"
+    },
+    "prompt": {
+      "provider": "builtin"
+    },
+    "image": {
+      "provider": "builtin"
+    }
   }
 }

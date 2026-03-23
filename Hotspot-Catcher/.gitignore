@@ -4,6 +4,7 @@ node_modules/
 # 输出文件
 output/
 *.log
+assets/reuse/
 
 # 环境变量
 .env

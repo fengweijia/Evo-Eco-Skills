@@ -17,6 +17,20 @@ async function requestImageWithFallback({
 }) {
   const errors = [];
 
+  function parseProviderError(error, payload, model) {
+    const responseData = error.response?.data || {};
+    const providerError = responseData.error || {};
+    return {
+      provider,
+      endpoint,
+      model,
+      payload_keys: Object.keys(payload),
+      status: error.response?.status || null,
+      code: providerError.code || null,
+      message: providerError.message || responseData.message || error.message
+    };
+  }
+
   for (const model of modelCandidates) {
     for (const buildPayload of payloadBuilders) {
       const payload = buildPayload(model, prompt);
@@ -37,14 +51,7 @@ async function requestImageWithFallback({
           return { url, errors };
         }
       } catch (error) {
-        errors.push({
-          provider,
-          endpoint,
-          model,
-          payload_keys: Object.keys(payload),
-          status: error.response?.status || null,
-          message: error.response?.data?.message || error.message
-        });
+        errors.push(parseProviderError(error, payload, model));
       }
     }
   }

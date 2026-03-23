@@ -2,6 +2,7 @@ const CONFIG_PATH = require('path').join(__dirname, '..', 'config.json');
 const fs = require('fs');
 const axios = require('axios');
 const { loadEnvFile } = require('./env.js');
+const { mergeInsightIntoPrompt } = require('./insight.js');
 
 loadEnvFile();
 
@@ -95,17 +96,26 @@ function resolveAiConfig(config) {
 async function generateOpinions(hotspot, runtimeConfig) {
   const config = getConfig(runtimeConfig);
   const ai = resolveAiConfig(config);
+  const insight = config._manual_insight || '';
 
   if (ai.provider === 'mock') {
-    return buildFallbackOpinions(hotspot);
+    const opinions = buildFallbackOpinions(hotspot);
+    if (insight) {
+      opinions[0].content = `${opinions[0].content}；${insight}`;
+    }
+    return opinions;
   }
 
   if (ai.provider === 'siliconflow' && ai.apiKey) {
     try {
+      const prompt = mergeInsightIntoPrompt(
+        `请围绕热点“${hotspot.title}”生成3个观点方向，返回JSON数组，字段:id,title,content,angle。`,
+        insight
+      );
       const content = await callSiliconflowChat({
         apiKey: ai.apiKey,
         model: ai.model,
-        prompt: `请围绕热点“${hotspot.title}”生成3个观点方向，返回JSON数组，字段:id,title,content,angle。`
+        prompt
       });
       const parsed = extractJson(content);
       if (Array.isArray(parsed) && parsed.length > 0) {
@@ -173,6 +183,7 @@ function buildXhsDraft(hotspot, opinion) {
 async function generateArticle(hotspot, opinion, platform = 'wechat', runtimeConfig) {
   const config = getConfig(runtimeConfig);
   const ai = resolveAiConfig(config);
+  const insight = config._manual_insight || '';
   const safeOpinion = opinion || buildFallbackOpinions(hotspot)[0];
 
   if (ai.provider === 'mock') {
@@ -184,10 +195,17 @@ async function generateArticle(hotspot, opinion, platform = 'wechat', runtimeCon
 
   if (ai.provider === 'siliconflow' && ai.apiKey) {
     try {
+      const basePrompt = config._optimized_prompt
+        ? `${config._optimized_prompt}\n热点:${hotspot.title}，观点:${safeOpinion.content}。返回JSON对象，字段:title,body,tags(数组)。`
+        : `请为${platform}生成发布文案，热点:${hotspot.title}，观点:${safeOpinion.content}。返回JSON对象，字段:title,body,tags(数组)。`;
+      const prompt = mergeInsightIntoPrompt(
+        basePrompt,
+        insight
+      );
       const content = await callSiliconflowChat({
         apiKey: ai.apiKey,
         model: ai.model,
-        prompt: `请为${platform}生成发布文案，热点:${hotspot.title}，观点:${safeOpinion.content}。返回JSON对象，字段:title,body,tags(数组)。`
+        prompt
       });
       const parsed = extractJson(content);
       if (parsed && typeof parsed === 'object') {

@@ -71,23 +71,29 @@ async function probeImage(image) {
     return { status: 'skipped', reason: 'missing_api_key' };
   }
   try {
+    const runtimeConfig = {
+      image: {
+        provider: image.provider,
+        api_key: image.apiKey,
+        model: image.model
+      }
+    };
     const results = await generateImageCandidates({
-      config: {
-        image: {
-          provider: image.provider,
-          api_key: image.apiKey,
-          model: image.model
-        }
-      },
+      config: runtimeConfig,
       title: '探针测试图',
       keyword: '探针',
       platform: 'wechat',
       styles: ['写实摄影']
     });
+    const imageUrl = results[0]?.imageUrl || '';
+    const isFallback = imageUrl.includes('picsum.photos');
     return {
-      status: results[0]?.imageUrl ? 'ok' : 'error',
-      hasUrl: Boolean(results[0]?.imageUrl),
-      imageUrl: results[0]?.imageUrl || ''
+      status: imageUrl ? (isFallback ? 'degraded' : 'ok') : 'error',
+      hasUrl: Boolean(imageUrl),
+      hasRealImage: Boolean(imageUrl) && !isFallback,
+      imageUrl,
+      fallback: isFallback,
+      lastError: runtimeConfig._last_image_error || null
     };
   } catch (error) {
     return {
