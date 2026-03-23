@@ -1,133 +1,184 @@
-# 🦞 热点捕手 (Hotspot Catcher)
+# 🦞 热点捕手（Hotspot Catcher）
 
-> 根据关键词自动采集B站、小红书等平台热点，生成自媒体内容
+> 面向“柑橘”等关键词的热点内容生产 Skill：抓取热点 → 生成公众号/小红书文案 → 生成 5 种风格配图候选 → 输出可发布包
 
-## 功能特性
+## 功能概览
 
-- ✅ 关键词配置 - 可自定义监听多个关键词
-- ✅ 多平台采集 - 支持B站、小红书、微博、知乎
-- ✅ 自动过滤 - 根据热度阈值过滤低热度内容
-- ✅ 观点生成 - AI生成3个观点方向
-- ✅ 文案写作 - 自动生成公众号/小红书版本
-- ✅ 配套配图 - 支持接入图片生成API
+- ✅ 多平台热点采集（B站/小红书/微博/知乎）
+- ✅ 支持复用生态数据源（本地 JSON 或 GitHub URL）
+- ✅ 自动生成双平台发布文案（标题、正文、关键词标签）
+- ✅ 自动生成 5 种风格配图候选
+- ✅ 失败兜底机制（AI 非 mock、图片供应商异常时仍可产出）
+- ✅ 运行报告输出（run-report.json）
 
-## 快速开始
+## 环境要求
 
-### 环境要求
+- Node.js >= 18
+- npm >= 9
 
-- Node.js >= 18.0.0
-- npm >= 9.0.0
-
-### 安装
+## 安装
 
 ```bash
-git clone <你的仓库地址>
-cd hotspot-catcher
+cd Hotspot-Catcher
 npm install
 ```
 
-### 配置
+## 一分钟上手（推荐）
 
-编辑 `config.json`：
+```bash
+npm run skill:citrus
+```
+
+该命令会使用默认参数：
+- 关键词：`柑橘`
+- 风格：`写实摄影,清新手绘,扁平插画,国风水墨,极简海报`
+
+## Skill 详细使用方法
+
+### 1) 默认运行
+
+```bash
+npm run skill:citrus
+```
+
+### 2) 自定义关键词与风格
+
+```bash
+node workflow.js --keyword 柑橘 --styles 写实摄影,清新手绘,扁平插画,国风水墨,极简海报
+```
+
+### 3) 输出目录说明
+
+每次运行会生成一个独立目录：
+
+```text
+output/publish-pack/run-时间戳/
+├── wechat.md
+├── xiaohongshu.md
+├── images/
+│   └── manifest.json
+└── run-report.json
+```
+
+- `wechat.md`：公众号发布文案（标题、正文、关键词标签）
+- `xiaohongshu.md`：小红书发布文案（标题、正文、关键词标签）
+- `images/manifest.json`：两平台各 5 种风格配图候选（含 prompt 和 imageUrl）
+- `run-report.json`：运行元信息、复用策略、最终产物路径
+
+## 配置说明（config.json）
+
+### 基础采集配置
 
 ```json
 {
-  "keywords": ["OPC一人公司", "AI副业", "AI创业", "OpenClaw", "多智能体"],
+  "keywords": ["柑橘"],
   "platforms": ["bilibili", "xiaohongshu", "weibo", "zhihu"],
-  "fetch_interval_hours": 6,
   "auto_filter": true,
   "min_views": 10000
 }
 ```
 
-### 运行
-
-```bash
-# 采集热点
-node fetch.js
-
-# 或使用完整流程（需要配置AI API）
-node workflow.js
-```
-
-## 项目结构
-
-```
-hotspot-catcher/
-├── config.json          # 配置文件
-├── fetch.js             # 热点采集脚本
-├── workflow.js          # 完整工作流（采集→观点→文案）
-├── generate-article.js  # 文案生成器
-├── utils/
-│   ├── platform.js      # 平台适配器
-│   └── ai.js            # AI调用封装
-├── templates/           # 文案模板
-│   ├── wechat.md
-│   └── xiaohongshu.md
-├── output/              # 输出目录
-│   ├── hotspots/        # 热点数据
-│   └── articles/        # 生成的文案
-├── package.json
-└── README.md
-```
-
-## 工作流程
-
-```
-1. 热点采集 → 根据关键词从各平台获取热点
-       ↓
-2. 热点筛选 → 选择要写的热点
-       ↓
-3. 观点生成 → AI生成3个观点方向
-       ↓
-4. 观点确认 → 用户选择观点
-       ↓
-5. 文案写作 → 生成公众号+小红书版本
-       ↓
-6. 配图生成 → AI生成配图（需要配置API）
-       ↓
-7. 手动发布 → 复制到各平台发布
-```
-
-## API 配置（可选）
-
-### 图片生成
-
-编辑 `config.json`：
-
-```json
-{
-  "image": {
-    "provider": "deepai",
-    "api_key": "your-api-key"
-  }
-}
-```
-
-### AI 大模型
+### AI 配置
 
 ```json
 {
   "ai": {
-    "provider": "openai",
-    "api_key": "your-api-key",
+    "provider": "mock",
+    "api_key": "",
     "model": "gpt-4"
   }
 }
 ```
 
-## 进阶：自动化发布
+- `provider = mock`：使用内置兜底文案
+- 非 mock：当前仍带兜底，不会因空观点导致流程崩溃
 
-要实现自动推送公众号/小红书，需要：
+### 图片配置
 
-| 平台 | 配置要求 |
-|:---|:---|
-| 公众号 | app_id + app_secret |
-| 小红书 | MCP 服务配置 |
+```json
+{
+  "image": {
+    "provider": "mock",
+    "api_key": ""
+  }
+}
+```
 
-## 贡献
+- `provider = mock`：返回可用占位图链接
+- `provider = deepai`：调用 DeepAI 文生图
+- 未知 provider / key 缺失 / 调用失败：自动回退 mock 链接
 
-欢迎提交 Issue 和 PR！
+### 生态复用配置
+
+```json
+{
+  "reuse": {
+    "enabled": false,
+    "local_hotspots_file": "",
+    "github_hotspots_url": ""
+  }
+}
+```
+
+- `enabled=true` 时优先尝试复用数据：
+  - `local_hotspots_file`：本地 JSON 文件路径
+  - `github_hotspots_url`：可直接 GET 的 JSON URL
+- 复用数据命中后，会优先作为热点来源
+
+## NPM 脚本
+
+```bash
+npm run fetch         # 仅采集热点
+npm run skill:citrus  # Skill 主流程（推荐）
+npm run probe:siliconflow # 真实API连通性探针
+npm test              # 稳定性测试
+```
+
+## 测试
+
+当前内置稳定性测试覆盖：
+- 非 mock AI 场景观点兜底
+- 图片供应商异常回退
+- 生态复用数据源优先接入
+
+执行：
+
+```bash
+npm test
+```
+
+## 项目结构
+
+```text
+Hotspot-Catcher/
+├── config.json
+├── fetch.js
+├── workflow.js
+├── package.json
+├── skills/
+│   └── citrus-hotspot-content/
+│       └── SKILL.md
+├── tests/
+│   └── workflow.stability.test.js
+├── templates/
+│   ├── wechat.md
+│   └── xiaohongshu.md
+└── utils/
+    ├── ai.js
+    ├── image.js
+    └── platform.js
+```
+
+## 常见问题
+
+### Q1：为什么输出目录没有文件？
+- 先执行 `npm run skill:citrus`，产物按时间戳生成在 `output/publish-pack/` 下。
+
+### Q2：我接入了真实 AI/图片后失败怎么办？
+- 当前流程有兜底机制，优先保证“有产出”。你可以先看 `run-report.json` 再定位配置问题。
+
+### Q3：如何做成自动发布？
+- 当前定位是“生成可发布包 + 手动发布”，后续可按公众号/小红书接口扩展发布器。
 
 ## License
 

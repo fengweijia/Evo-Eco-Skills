@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node workflow.js",
     "fetch": "node fetch.js",
-    "skill:citrus": "node workflow.js --keyword 柑橘 --styles 写实摄影,清新手绘,扁平插画,国风水墨,极简海报",
+    "skill:citrus": "node workflow.js --styles 写实摄影,清新手绘,扁平插画,国风水墨,极简海报",
+    "probe:siliconflow": "node scripts/probe-siliconflow.js",
     "test": "node --test"
   },
   "keywords": [
