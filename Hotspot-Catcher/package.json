@@ -9,7 +9,8 @@
     "skill:citrus": "node workflow.js --styles 写实摄影,清新手绘,扁平插画,国风水墨,极简海报",
     "reuse:import": "node scripts/import-reuse-assets.js",
     "probe:siliconflow": "node scripts/probe-siliconflow.js",
-    "test": "node --test"
+    "test": "node --test",
+    "cli": "node src/cli/index.js"
   },
   "keywords": [
     "hotspot",
