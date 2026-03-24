@@ -4,6 +4,7 @@ const { ConfigManager } = require('../config/manager.js');
 const { fetchHotspots } = require('../engines/hotspot/index.js');
 const { analyzeViral } = require('../engines/analyzer/index.js');
 const { generateDrafts } = require('../engines/drafter/index.js');
+const { confirmDraft } = require('../engines/drafter/confirmer.js');
 const { generateImages } = require('../engines/image/index.js');
 
 async function main() {
@@ -41,18 +42,37 @@ async function main() {
 
   if ((args.steps.includes('draft') || args.steps.includes('all')) && analyzeResult) {
     console.log('✍️ 正在生成文案...');
-    draftsResult = await generateDrafts(analyzeResult, platforms);
+    const draftResult = await generateDrafts(analyzeResult, platforms);
+    const draftsOutput = draftResult.drafts || draftResult;
+
+    const confirmedDrafts = {};
 
     for (const platform of platforms) {
-      if (draftsResult[platform]) {
+      if (draftsOutput[platform]) {
         const output = formatOutput({
           platform,
-          items: draftsResult[platform].candidates
+          items: draftsOutput[platform].candidates
         }, 'candidates', env);
         console.log(output);
-        console.log(`\n请输入编号确认（1-3）: _`);
+
+        // 使用交互确认
+        try {
+          const selected = await confirmDraft(draftsOutput[platform].candidates);
+          if (selected) {
+            confirmedDrafts[platform] = { final: selected };
+            console.log(`✅ 已选择: ${selected.title}`);
+          } else {
+            // 用户选择编辑或取消，使用第一个作为默认
+            confirmedDrafts[platform] = { final: draftsOutput[platform].candidates[0] };
+          }
+        } catch (e) {
+          console.log(`确认流程跳过，使用默认: ${e.message}`);
+          confirmedDrafts[platform] = { final: draftsOutput[platform].candidates[0] };
+        }
       }
     }
+
+    draftsResult = confirmedDrafts;
   }
 
   if ((args.steps.includes('image') || args.steps.includes('all')) && draftsResult) {

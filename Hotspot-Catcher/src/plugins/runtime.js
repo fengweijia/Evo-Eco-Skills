@@ -1,4 +1,7 @@
 const path = require('path');
+const fs = require('fs');
+const https = require('https');
+const http = require('http');
 
 class PluginRuntime {
   constructor(config) {
@@ -44,12 +47,37 @@ class PluginRuntime {
         return require(path.resolve(external.path));
       }
       if (external.url) {
-        return null;
+        // 下载远程模块
+        const moduleCode = await this.downloadUrl(external.url);
+        if (moduleCode) {
+          // 临时写入文件并加载
+          const tempPath = path.join(process.cwd(), 'temp_plugin.js');
+          fs.writeFileSync(tempPath, moduleCode, 'utf-8');
+          const plugin = require(tempPath);
+          fs.unlinkSync(tempPath); // 清理临时文件
+          return plugin;
+        }
       }
     } catch (e) {
       console.warn(`Failed to load external ${type}:`, e.message);
     }
     return null;
+  }
+
+  downloadUrl(url) {
+    return new Promise((resolve, reject) => {
+      const client = url.startsWith('https') ? https : http;
+      client.get(url, (res) => {
+        if (res.statusCode === 301 || res.statusCode === 302) {
+          // 处理重定向
+          this.downloadUrl(res.headers.location).then(resolve).catch(reject);
+          return;
+        }
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => resolve(data));
+      }).on('error', reject);
+    });
   }
 
   async callEngine(type, method, ...args) {

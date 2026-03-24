@@ -9,7 +9,12 @@ class ConfigManager {
   loadConfig() {
     const configPath = path.join(process.cwd(), 'config.json');
     if (fs.existsSync(configPath)) {
-      return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      try {
+        return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      } catch (e) {
+        console.error(`Failed to parse config.json: ${e.message}`);
+        return {};
+      }
     }
     return {};
   }
@@ -24,6 +29,9 @@ class ConfigManager {
     }
     if (args.platforms) {
       this.config.platforms = args.platforms;
+    }
+    if (args.styles) {
+      this.config.styles = args.styles;
     }
   }
 }
