@@ -4,14 +4,14 @@
 
 ## 功能概览
 
-- ✅ 多平台热点采集（B站/小红书/微博/知乎）
-- ✅ 支持复用生态数据源（本地 JSON 或 GitHub URL）
-- ✅ 自动生成双平台发布文案（标题、正文、关键词标签）
-- ✅ 自动生成 5 种风格配图候选
+- ✅ 多平台热点采集（B站/小红书/微博/知乎），按 TOP5 排名选取
+- ✅ 热点内容统一化处理 + 爆款结构分析（钩子/冲突/证据/CTA）
+- ✅ 爆款文案生成，每平台输出 3 个候选，支持交互式确认
+- ✅ 自动生成 5 种风格配图（封面/内容/小红书用图）
+- ✅ 模块化架构，4 个引擎可独立调用
 - ✅ 失败兜底机制（AI 非 mock、图片供应商异常时仍可产出）
+- ✅ 插件运行时，支持外部技能接入
 - ✅ 运行报告输出（run-report.json）
-- ✅ 爆款结构分析与5套模板重组（T1-T5）
-- ✅ 插件运行时（provider路由、fallback、trace）
 
 ## 环境要求
 
@@ -35,19 +35,44 @@ npm run skill:citrus
 - 关键词：`柑橘`
 - 风格：`写实摄影,清新手绘,扁平插画,国风水墨,极简海报`
 
-## Skill 详细使用方法
+## 两种运行模式
 
-### 1) 默认运行
+### 模式一：传统 workflow（自动执行）
 
 ```bash
 npm run skill:citrus
 ```
 
-### 2) 自定义关键词与风格
+### 模式二：CLI 分步执行（推荐）
+
+使用新的模块化 CLI，支持分步执行和交互确认：
 
 ```bash
-node workflow.js --keyword 柑橘 --styles 写实摄影,清新手绘,扁平插画,国风水墨,极简海报
+# 完整流程
+npm run cli -- --step all --keyword 柑橘
+
+# 分步执行（可自由组合）
+npm run cli -- --step hotspot --keyword 柑橘       # 抓取热点
+npm run cli -- --step analyze                       # 分析热点
+npm run cli -- --step draft                         # 生成文案（交互确认）
+npm run cli -- --step image                         # 生成配图
+
+# 指定平台
+npm run cli -- --step all --keyword 柑橘 --platforms wechat,xiaohongshu
+
+# 指定风格
+npm run cli -- --step image --keyword 柑橘 --styles 写实摄影,清新手绘
 ```
+
+### CLI 参数说明
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `--step` | 执行步骤（hotspot/analyze/draft/image/all） | `--step hotspot,analyze` |
+| `--keyword` | 关键词 | `--keyword 柑橘` |
+| `--platforms` | 目标平台（逗号分隔） | `--platforms wechat,xiaohongshu` |
+| `--styles` | 图片风格（逗号分隔） | `--styles 写实摄影,清新手绘` |
+| `--config` | 配置文件路径 | `--config custom.json` |
 
 ### 3) 输出目录说明
 
