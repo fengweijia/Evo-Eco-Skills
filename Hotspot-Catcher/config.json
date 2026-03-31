@@ -1,0 +1,53 @@
+{
+  "keywords": [
+    "OPC",
+    "一人公司",
+    "AI副业",
+    "AI创业"
+  ],
+  "platforms": [
+    "bilibili",
+    "xiaohongshu"
+  ],
+  "fetch_interval_hours": 6,
+  "auto_filter": true,
+  "min_views": 10000,
+  "ai": {
+    "provider": "siliconflow",
+    "api_key": "sk-dtudllxnguzftxucibkdmvwhmrwpsyersmxebwvxejyfybka",
+    "model": "Pro/MiniMaxAI/MiniMax-M2.5"
+  },
+  "image": {
+    "provider": "volcengine",
+    "api_key": "8abf0efc-99c3-44fa-a682-f798a30c08ec",
+    "model": "doubao-seedream-4-5-251128"
+  },
+  "reuse": {
+    "enabled": false,
+    "local_hotspots_file": "",
+    "github_hotspots_url": ""
+  },
+  "wechat": {
+    "enabled": false,
+    "app_id": "",
+    "app_secret": ""
+  },
+  "xiaohongshu": {
+    "enabled": false,
+    "mcp_url": ""
+  },
+  "plugins": {
+    "hotspot": {
+      "provider": "builtin"
+    },
+    "viral": {
+      "provider": "builtin"
+    },
+    "prompt": {
+      "provider": "builtin"
+    },
+    "image": {
+      "provider": "builtin"
+    }
+  }
+}

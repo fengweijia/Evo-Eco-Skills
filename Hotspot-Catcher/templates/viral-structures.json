@@ -1,0 +1,27 @@
+[
+  {
+    "id": "T1",
+    "name": "问题-方案型",
+    "platform_hint": ["xiaohongshu", "wechat"]
+  },
+  {
+    "id": "T2",
+    "name": "误区-纠偏型",
+    "platform_hint": ["wechat"]
+  },
+  {
+    "id": "T3",
+    "name": "案例拆解型",
+    "platform_hint": ["wechat", "xiaohongshu"]
+  },
+  {
+    "id": "T4",
+    "name": "清单指南型",
+    "platform_hint": ["xiaohongshu"]
+  },
+  {
+    "id": "T5",
+    "name": "趋势预判型",
+    "platform_hint": ["wechat"]
+  }
+]

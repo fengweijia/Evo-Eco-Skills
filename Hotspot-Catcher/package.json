@@ -1,0 +1,27 @@
+{
+  "name": "hotspot-catcher",
+  "version": "1.0.0",
+  "description": "根据关键词自动采集热点，生成自媒体内容",
+  "main": "workflow.js",
+  "scripts": {
+    "start": "node workflow.js",
+    "fetch": "node fetch.js",
+    "skill:citrus": "node workflow.js --styles 写实摄影,清新手绘,扁平插画,国风水墨,极简海报",
+    "reuse:import": "node scripts/import-reuse-assets.js",
+    "probe:siliconflow": "node scripts/probe-siliconflow.js",
+    "test": "node --test",
+    "cli": "node src/cli/index.js"
+  },
+  "keywords": [
+    "hotspot",
+    "crawler",
+    "自媒体",
+    "OPC",
+    "AI"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
